@@ -8,7 +8,6 @@ module.exports.login = async (req, res, next) => {
     if (!user)
       return res.json({ msg: "Usuario o contraseña incorrecta", status: false });
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if(isPasswordValid) console.log("bien")
     if (!isPasswordValid)
       return res.json({ msg: "Usuario o contraseña incorrecta", status: false });
     delete user.password;
@@ -23,15 +22,18 @@ module.exports.register = async (req, res, next) => {
     const { username, email, password } = req.body;
     const usernameCheck = await User.findOne({ username });
     if (usernameCheck)
-      return res.json({ msg: "Username already used", status: false });
+      return res.json({ msg: "Username ya está en uso", status: false });
     const emailCheck = await User.findOne({ email });
     if (emailCheck)
-      return res.json({ msg: "Email already used", status: false });
+      return res.json({ msg: "Correo ya en uso", status: false });
     const hashedPassword = await bcrypt.hash(password, 10);
+    var randomColor = Math.floor(Math.random()*16777215).toString(16);
     const user = await User.create({
       email,
       username,
       password: hashedPassword,
+      isAvatarImageSet: true,
+      avatarImage: `https://ui-avatars.com/api/?name=${username}&background=0D8ABC&color=${randomColor}&size=128`
     });
     delete user.password;
     return res.json({ status: true, user });
