@@ -1,0 +1,13 @@
+# docker-compose.yml
+version: '3'
+services:
+  mongo:
+    image: mongo:4.4
+    environment:
+      - MONGO_INITDB_DATABASE=server_mongo
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./mongo_data:/data/db
