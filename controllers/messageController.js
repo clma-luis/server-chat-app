@@ -31,8 +31,8 @@ module.exports.addMessage = async (req, res, next) => {
       sender: from,
     });
 
-    if (data) return res.json({ msg: "Message added successfully." });
-    else return res.json({ msg: "Failed to add message to the database" });
+    if (data) return res.json({ msg: "El mensaje fue agregado satisfactoriamente." });
+    else return res.json({ msg: "Ha fallado agregar el mensaje en la base de datos" });
   } catch (ex) {
     next(ex);
   }

@@ -8,6 +8,7 @@ module.exports.login = async (req, res, next) => {
     if (!user)
       return res.json({ msg: "Usuario o contraseña incorrecta", status: false });
     const isPasswordValid = await bcrypt.compare(password, user.password);
+
     if (!isPasswordValid)
       return res.json({ msg: "Usuario o contraseña incorrecta", status: false });
     delete user.password;
@@ -30,6 +31,7 @@ module.exports.register = async (req, res, next) => {
     var randomColor = Math.floor(Math.random()*16777215).toString(16);
     const user = await User.create({
       email,
+      status: "inactive",
       username,
       password: hashedPassword,
       isAvatarImageSet: true,

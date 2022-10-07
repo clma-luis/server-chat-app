@@ -10,6 +10,8 @@ require("dotenv").config();
 app.use(cors());
 app.use(express.json());
 
+let users = [];
+
 mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
@@ -36,10 +38,30 @@ const io = socket(server, {
 });
 
 global.onlineUsers = new Map();
+
 io.on("connection", (socket) => {
+  console.log(`${socket.id} esta conectado`);
   global.chatSocket = socket;
+
   socket.on("add-user", (userId) => {
     onlineUsers.set(userId, socket.id);
+
+    io.emit("newUserResponse", users);
+  });
+
+  socket.on('newUser', (data) => {
+    //Adds the new user to the list of users
+     users.push(data);
+    //Sends the list of users to the client
+    io.emit('newUserResponse', users);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("🔥: un usuario desconectado");
+    const i = users.indexOf(socket.id);
+    users.splice(i, 1)
+    io.emit("newUserResponse", users);
+    socket.disconnect();
   });
 
   socket.on("send-msg", (data) => {
