@@ -6,17 +6,19 @@ const userSchema = new mongoose.Schema({
     required: true,
     min: 3,
     max: 20,
-    unique: true,
+  },
+  role: {
+    type: String,
+    required: true
   },
   email: {
     type: String,
-    required: true,
     unique: true,
+    default: "",
     max: 50,
   },
   password: {
     type: String,
-    required: true,
     min: 8,
   },
   isAvatarImageSet: {
@@ -26,6 +28,10 @@ const userSchema = new mongoose.Schema({
   avatarImage: {
     type: String,
     default: "",
+  },
+  externalId: {
+    type: String,
+    unique: true,
   },
 });
 

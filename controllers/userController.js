@@ -1,20 +1,80 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 module.exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user)
-      return res.json({ msg: "Usuario o contraseña incorrecta", status: false });
+      return res.json({
+        msg: "Usuario o contraseña incorrecta",
+        status: false,
+      });
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid)
-      return res.json({ msg: "Usuario o contraseña incorrecta", status: false });
-    delete user.password;
-    return res.json({ status: true, user });
+      return res.json({
+        msg: "Usuario o contraseña incorrecta",
+        status: false,
+      });
+    const payload = {
+      sub: user.id,
+      role: user.role,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "5h",
+    });
+    const result = {
+      _id: user._id,
+      username: user.username,
+      isAvatarImageSet: user.isAvatarImageSet,
+      avatarImage: user.avatarImage,
+    };
+    return res.json({ status: true, result, token });
   } catch (ex) {
     next(ex);
+  }
+};
+
+module.exports.LoginExternalUser = async (req, res, next) => {
+  try {
+    const { username, externalId } = req.body;
+    const checkExternalId = await User.findOne({ externalId });
+    
+    console.log(checkExternalId)
+
+   if (checkExternalId) {
+      const payload = {
+        sub: checkExternalId.id,
+        role: checkExternalId.role,
+        username: checkExternalId.username,
+        isAvatarImageSet: checkExternalId.isAvatarImageSet,
+        avatarImage: checkExternalId.avatarImage,
+      };
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: "5h",
+      });
+
+      return res.json({ status: true, token });
+    }
+      if (checkExternalId === null) {
+      var randomColor = Math.floor(Math.random() * 16777215).toString(16);
+      const user = await User.create({
+        username,
+        role: "employee",
+        externalId,
+        isAvatarImageSet: true,
+        avatarImage: `https://ui-avatars.com/api/?name=${username}&background=${randomColor}&color=${randomColor}&size=128`,
+      });
+
+      return res.json({ status: true, user });
+    } 
+  } catch (ex) {
+    next(ex);
+   
   }
 };
 
@@ -25,19 +85,21 @@ module.exports.register = async (req, res, next) => {
     if (usernameCheck)
       return res.json({ msg: "Username ya está en uso", status: false });
     const emailCheck = await User.findOne({ email });
-    if (emailCheck)
-      return res.json({ msg: "Correo ya en uso", status: false });
-    const hashedPassword = await bcrypt.hash(password, 10);
-    var randomColor = Math.floor(Math.random()*16777215).toString(16);
-    const user = await User.create({
-      email,
-      username,
-      password: hashedPassword,
-      isAvatarImageSet: true,
-      avatarImage: `https://ui-avatars.com/api/?name=${username}&background=0D8ABC&color=${randomColor}&size=128`
-    });
-    delete user.password;
-    return res.json({ status: true, user });
+    if (emailCheck) return res.json({ msg: "Correo ya en uso", status: false });
+    if (!emailCheck) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      var randomColor = Math.floor(Math.random() * 16777215).toString(16);
+      const user = await User.create({
+        email,
+        role: "admin",
+        username,
+        password: hashedPassword,
+        isAvatarImageSet: true,
+        avatarImage: `https://ui-avatars.com/api/?name=${username}&background=${randomColor}&color=${randomColor}&size=128`,
+      });
+      delete user.password;
+      return res.json({ status: true, user });
+    }
   } catch (ex) {
     next(ex);
   }
