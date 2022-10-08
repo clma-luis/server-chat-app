@@ -58,8 +58,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("🔥: un usuario desconectado");
-    const i = users.indexOf(socket.id);
-    users.splice(i, 1)
+    users = users.filter((user) => user.socketID !== socket.id);
     io.emit("newUserResponse", users);
     socket.disconnect();
   });
