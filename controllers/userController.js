@@ -31,7 +31,6 @@ module.exports.register = async (req, res, next) => {
     var randomColor = Math.floor(Math.random()*16777215).toString(16);
     const user = await User.create({
       email,
-      status: "inactive",
       username,
       password: hashedPassword,
       isAvatarImageSet: true,
