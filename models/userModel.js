@@ -14,7 +14,6 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
-    default: "",
     max: 50,
   },
   password: {
@@ -31,7 +30,7 @@ const userSchema = new mongoose.Schema({
   },
   externalId: {
     type: String,
-    unique: true,
+   
   },
 });
 

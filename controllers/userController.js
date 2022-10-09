@@ -26,13 +26,8 @@ module.exports.login = async (req, res, next) => {
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "5h",
     });
-    const result = {
-      _id: user._id,
-      username: user.username,
-      isAvatarImageSet: user.isAvatarImageSet,
-      avatarImage: user.avatarImage,
-    };
-    return res.json({ status: true, result, token });
+
+    return res.json({ status: true, user, token });
   } catch (ex) {
     next(ex);
   }
@@ -42,10 +37,10 @@ module.exports.LoginExternalUser = async (req, res, next) => {
   try {
     const { username, externalId } = req.body;
     const checkExternalId = await User.findOne({ externalId });
-    
-    console.log(checkExternalId)
 
-   if (checkExternalId) {
+    console.log(checkExternalId);
+
+    if (checkExternalId) {
       const payload = {
         sub: checkExternalId.id,
         role: checkExternalId.role,
@@ -60,21 +55,22 @@ module.exports.LoginExternalUser = async (req, res, next) => {
 
       return res.json({ status: true, token });
     }
-      if (checkExternalId === null) {
+    if (checkExternalId === null) {
       var randomColor = Math.floor(Math.random() * 16777215).toString(16);
+      var randomColorDos = Math.floor(Math.random() * 1657457215).toString(16);
       const user = await User.create({
         username,
         role: "employee",
         externalId,
         isAvatarImageSet: true,
-        avatarImage: `https://ui-avatars.com/api/?name=${username}&background=${randomColor}&color=${randomColor}&size=128`,
+        email: externalId,
+        avatarImage: `https://ui-avatars.com/api/?name=${username}&background=${randomColor}&color=${randomColorDos}&size=128`,
       });
 
       return res.json({ status: true, user });
-    } 
+    }
   } catch (ex) {
     next(ex);
-   
   }
 };
 
@@ -89,13 +85,14 @@ module.exports.register = async (req, res, next) => {
     if (!emailCheck) {
       const hashedPassword = await bcrypt.hash(password, 10);
       var randomColor = Math.floor(Math.random() * 16777215).toString(16);
+      var randomColorDos = Math.floor(Math.random() * 1657457215).toString(16);
       const user = await User.create({
         email,
         role: "admin",
         username,
         password: hashedPassword,
         isAvatarImageSet: true,
-        avatarImage: `https://ui-avatars.com/api/?name=${username}&background=${randomColor}&color=${randomColor}&size=128`,
+        avatarImage: `https://ui-avatars.com/api/?name=${username}&background=${randomColor}&color=${randomColorDos}&size=128`,
       });
       delete user.password;
       return res.json({ status: true, user });
@@ -111,6 +108,7 @@ module.exports.getAllUsers = async (req, res, next) => {
       "email",
       "username",
       "avatarImage",
+      "role",
       "_id",
     ]);
     return res.json(users);
