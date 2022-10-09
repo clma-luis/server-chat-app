@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    required: true
+    required: true,
   },
   email: {
     type: String,
@@ -25,12 +25,13 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   avatarImage: {
-    type: String,
-    default: "",
+    type: String 
+   
   },
   externalId: {
     type: String,
-   
+    required: false,
+    default: null,
   },
 });
 
