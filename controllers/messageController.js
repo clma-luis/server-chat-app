@@ -14,8 +14,11 @@ module.exports.getMessages = async (req, res, next) => {
       return {
         fromSelf: msg.sender.toString() === from,
         message: msg.message.text,
+        image: msg.message.image,
+        time: msg.createdAt
       };
     });
+    
     res.json(projectedMessages);
   } catch (ex) {
     next(ex);
@@ -24,15 +27,16 @@ module.exports.getMessages = async (req, res, next) => {
 
 module.exports.addMessage = async (req, res, next) => {
   try {
-    const { from, to, message } = req.body;
+    const { from, to, message, image } = req.body;
     const data = await Messages.create({
-      message: { text: message },
+      message: { text: message, image: image },
       users: [from, to],
       sender: from,
+  
     });
 
     if (data) return res.json({ msg: "El mensaje fue agregado satisfactoriamente." });
-    else return res.json({ msg: "Ha fallado agregar el mensaje en la base de datos" });
+    else return res.json({ msg: "Ha fallado al agregar el mensaje en la base de datos" });
   } catch (ex) {
     next(ex);
   }
