@@ -14,8 +14,11 @@ module.exports.getMessages = async (req, res, next) => {
       return {
         fromSelf: msg.sender.toString() === from,
         message: msg.message.text,
+        image: msg.message.image,
+        time: msg.createdAt
       };
     });
+    
     res.json(projectedMessages);
   } catch (ex) {
     next(ex);
